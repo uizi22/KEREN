@@ -358,6 +358,20 @@
     loop();
   }
 
+  // ----------------------------------------------------------
+  // Hero reel — load images from data-src, skip if not found
+  // ----------------------------------------------------------
+  function initReel() {
+    document.querySelectorAll('.reel-item[data-src]').forEach(fig => {
+      const src = fig.dataset.src;
+      const img = document.createElement('img');
+      img.alt = '';
+      img.onload  = () => fig.appendChild(img);
+      img.onerror = () => { /* keep gradient placeholder */ };
+      img.src = src;
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initCanvas();
     initReveal();
@@ -365,5 +379,6 @@
     initPieceHover();
     initFaq();
     initCursor();
+    initReel();
   });
 })();

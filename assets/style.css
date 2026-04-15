@@ -103,13 +103,13 @@ header.topbar {
 
 .brand-logo {
   width: 36px; height: 36px;
-  color: var(--aqua-deep);
   opacity: 0.85;
-  transition: all 0.6s ease;
+  transition: opacity 0.4s ease, transform 0.6s ease;
+  display: block;
+  object-fit: contain;
 }
 
 .brand:hover .brand-logo {
-  color: var(--sea);
   opacity: 1;
   transform: rotate(4deg);
 }
@@ -277,88 +277,186 @@ p {
 }
 
 /* Hero */
+/* ============================================================
+   Hero — blurred full-screen photo reel, text overlay
+   ============================================================ */
 .hero {
-  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Blurred photo reel (full background) ── */
+.hero-reel {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/*
+  各写真は 100vw 固定幅 → 6枚で 600vw
+  translateX(-600vw) でちょうど1セット分進み、
+  複製セットがそのまま続くのでジャンプなしにループ
+*/
+.hero-reel-track {
+  display: flex;
+  height: 100%;
+  animation: reelScroll 140s linear infinite;
+  will-change: transform;
+}
+
+@keyframes reelScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-600vw); }
+}
+
+.reel-item {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg,
+    rgba(209, 228, 238, 0.5) 0%,
+    rgba(224, 238, 245, 0.5) 100%);
+  /* 両端をフェードして隣の写真と自然につながる */
+  mask-image: linear-gradient(90deg,
+    transparent  0%,
+    black       30%,
+    black       70%,
+    transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent  0%,
+    black       30%,
+    black       70%,
+    transparent 100%);
+}
+
+.reel-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  /* ぼかし＋少し暗く＋彩度を落として奥行き感 */
+  filter: blur(7px) brightness(0.78) saturate(0.85);
+  /* ぼかしのエッジ滲みを防ぐため少し拡大 */
+  transform: scale(1.06);
+  transform-origin: center;
+}
+
+/* 画面全体を覆うオーバーレイ */
+.hero-reel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 130% 120% at 50% 50%,
+      rgba(224, 238, 245, 0.55) 0%,
+      rgba(209, 228, 238, 0.45) 35%,
+      rgba(180, 210, 230, 0.30) 65%,
+      rgba(140, 190, 215, 0.15) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Text (中央にオーバーレイ) ── */
+.hero-text {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 10rem 2rem 4rem;
-  position: relative;
+  padding: 0 2rem;
+  padding-top: 72px; /* ヘッダー分 */
 }
 
 .hero-kanji {
-  font-family: 'Shippori Mincho B1', 'Noto Serif JP', serif;
-  font-size: 0.85rem;
-  font-weight: 300;
-  letter-spacing: 1.2em;
-  color: var(--aqua-deep);
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.95em;
+  color: rgba(255, 255, 255, 0.80);
+  text-shadow: 0 1px 16px rgba(74, 144, 164, 0.45);
   opacity: 0;
-  margin-bottom: 2.5rem;
-  padding-left: 1.2em;
-  animation: fadeUp 1.8s ease 0.3s forwards;
+  margin-bottom: 2rem;
+  padding-left: 0.95em;
+  animation: fadeUp 1.8s ease 0.4s forwards;
 }
 
 .hero-title {
-  font-family: 'Cormorant Garamond', 'Outfit', serif;
-  font-size: clamp(3.5rem, 10vw, 8rem);
-  font-weight: 300;
-  letter-spacing: 0.12em;
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.6rem, 6vw, 5rem);
+  font-weight: 200;
+  letter-spacing: 1em;
   line-height: 1;
+  padding-left: 1em;
+  color: #ffffff;
+  text-shadow: none;
   opacity: 0;
-  animation: fadeUp 2s ease 0.6s forwards;
+  animation: fadeUp 2s ease 0.65s forwards;
 }
 
 .hero-sub {
   font-family: 'Outfit', sans-serif;
   font-weight: 300;
-  font-size: 0.85rem;
-  letter-spacing: 0.6em;
-  color: var(--slate);
+  font-size: 0.65rem;
+  letter-spacing: 0.58em;
+  color: rgba(255, 255, 255, 0.55);
   opacity: 0;
-  margin-top: 2rem;
+  margin-top: 1.6rem;
+  padding-left: 0.58em;
   text-transform: uppercase;
   animation: fadeUp 2s ease 0.9s forwards;
 }
 
-.hero-divider {
-  width: 1px; height: 80px;
-  background: linear-gradient(180deg, transparent, var(--aqua-deep), transparent);
-  margin: 3rem auto 2rem;
+/* Hairline rule */
+.hero-rule {
+  width: 44px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent, rgba(255, 255, 255, 0.60), transparent);
+  margin: 1.8rem auto;
   opacity: 0;
-  animation: fadeDown 2s ease 1.2s forwards;
+  animation: fadeIn 2s ease 1.15s forwards;
 }
 
 .hero-quote {
-  font-family: 'Shippori Mincho B1', 'Noto Serif JP', serif;
-  font-weight: 300;
-  font-size: 0.9rem;
-  line-height: 2.4;
-  letter-spacing: 0.3em;
-  color: var(--slate);
+  font-family: 'Shippori Mincho B1', serif;
+  font-weight: 400;
+  font-size: 0.68rem;
+  line-height: 1;
+  letter-spacing: 0.42em;
+  color: rgba(255, 255, 255, 0.50);
   opacity: 0;
-  animation: fadeDown 2s ease 1.4s forwards;
+  padding-left: 0.42em;
+  animation: fadeIn 2s ease 1.35s forwards;
 }
 
+/* Scroll hint */
 .scroll-cue {
   position: absolute;
-  bottom: 3rem; left: 50%;
+  bottom: 2rem; left: 50%;
   transform: translateX(-50%);
-  color: var(--mist);
-  font-size: 0.65rem;
-  letter-spacing: 0.4em;
+  z-index: 3;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.58rem;
+  letter-spacing: 0.45em;
   text-transform: uppercase;
   opacity: 0;
-  animation: fadeIn 2s ease 2s forwards;
+  padding-left: 0.45em;
+  animation: fadeIn 2.5s ease 2s forwards;
 }
 
 .scroll-cue::after {
   content: '';
   display: block;
-  width: 1px; height: 40px;
-  background: linear-gradient(180deg, var(--aqua-deep), transparent);
-  margin: 0.8rem auto 0;
+  width: 1px; height: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5), transparent);
+  margin: 0.6rem auto 0;
   animation: pulseDown 2s ease infinite;
 }
 
@@ -432,30 +530,80 @@ p {
   border-radius: 3px;
 }
 
+/* 色付きぼかしオーバーレイ（ヒーローリールと同じ） */
 .piece-image::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(127, 184, 214, 0.3), transparent 50%);
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  z-index: 2;
+  background: radial-gradient(ellipse 130% 120% at 50% 50%,
+    rgba(224, 238, 245, 0.55) 0%,
+    rgba(209, 228, 238, 0.45) 35%,
+    rgba(180, 210, 230, 0.30) 65%,
+    rgba(140, 190, 215, 0.15) 100%);
+  pointer-events: none;
+  transition: opacity 0.55s ease;
 }
 
-.piece-image:hover::before { opacity: 1; }
+.piece-image:hover::before { opacity: 0; }
 
-.piece-image .placeholder {
+/* 実写真 */
+.piece-photo {
+  display: block;
   position: absolute;
   inset: 0;
-  display: flex;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  filter: blur(4px) brightness(0.82) saturate(0.85);
+  transform: scale(1.06);
+  transform-origin: center;
+  transition: filter 0.55s ease, transform 0.55s ease;
+}
+
+.piece-image:hover .piece-photo {
+  filter: none;
+  transform: scale(1.05);
+}
+
+/* ファイル名ヒント（写真がないときだけ表示） */
+.photo-hint {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--aqua-deep);
-  opacity: 0.4;
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
+  gap: 0.7rem;
+  z-index: 1;
+  pointer-events: none;
 }
+
+.photo-hint::before {
+  content: '+';
+  font-size: 1.2rem;
+  font-weight: 200;
+  color: var(--aqua);
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.photo-hint span {
+  font-family: 'Outfit', monospace;
+  font-size: 0.68rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--aqua-deep);
+  opacity: 0.55;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+/* 写真なし状態 */
+.piece-image.no-photo .piece-photo { display: none; }
+.piece-image.no-photo .photo-hint  { display: flex; }
 
 .piece-tag {
   font-family: 'Outfit', sans-serif;
@@ -996,10 +1144,11 @@ footer {
   margin-bottom: 2rem;
 }
 
-.footer-brand svg {
+.footer-logo-img {
   width: 28px; height: 28px;
-  color: var(--aqua-deep);
-  opacity: 0.85;
+  object-fit: contain;
+  opacity: 0.70;
+  display: block;
 }
 
 .footer-brand-name {
@@ -1058,16 +1207,8 @@ footer {
   pointer-events: none;
   z-index: 10000;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle at 38% 32%,
-    rgba(255, 255, 255, 1)    0%,
-    rgba(220, 238, 245, 0.95) 30%,
-    rgba(127, 184, 214, 0.85) 70%,
-    rgba(74,  144, 164, 0.55) 100%);
-  box-shadow:
-    0 0 6px  rgba(127, 184, 214, 0.7),
-    0 0 14px rgba(127, 184, 214, 0.3),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.7),
-    inset -1px -1px 1px rgba(74, 144, 164, 0.25);
+  background: rgba(127, 184, 214, 0.9);
+  box-shadow: none;
   will-change: transform;
   transition: width 0.2s ease, height 0.2s ease,
               background 0.2s ease, box-shadow 0.2s ease;
